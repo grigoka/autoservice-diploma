@@ -1,0 +1,4 @@
+ALTER TABLE vehicles
+    ADD COLUMN IF NOT EXISTS next_inspection_at TIMESTAMP WITHOUT TIME ZONE,
+    ADD COLUMN IF NOT EXISTS last_inspection_reminder_at TIMESTAMP WITHOUT TIME ZONE;
+

@@ -1,0 +1,3 @@
+ALTER TABLE app_settings
+    ADD COLUMN IF NOT EXISTS vat_rate NUMERIC(12,2);
+

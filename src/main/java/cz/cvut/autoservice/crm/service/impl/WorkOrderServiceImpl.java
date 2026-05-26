@@ -246,10 +246,17 @@ public class WorkOrderServiceImpl implements WorkOrderService {
             throw new IllegalArgumentException("Work order is not assigned to mechanic " + mechanicId);
         }
 
-        if (order.getStatus() != WorkOrderStatus.IN_PROGRESS) {
-            throw new IllegalStateException("Work can start only after approval (status IN_PROGRESS)");
+        if (order.getStatus() == WorkOrderStatus.WAITING_FOR_APPROVAL) {
+            WorkOrderStatus oldStatus = order.getStatus();
+            order.markInProgress();
+            WorkOrder savedOrder = workOrderRepository.save(order);
+            notificationService.notifyStatusChange(savedOrder, oldStatus, savedOrder.getStatus());
+            return savedOrder;
         }
-        return order;
+        if (order.getStatus() == WorkOrderStatus.IN_PROGRESS) {
+            return order;
+        }
+        throw new IllegalStateException("Can start work only from WAITING_FOR_APPROVAL or IN_PROGRESS");
     }
 
     @Override

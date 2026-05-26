@@ -67,6 +67,13 @@ public class VehicleServiceImpl implements VehicleService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<Vehicle> getAllVehicles() {
+        log.debug("Getting all vehicles");
+        return vehicleRepository.findAll();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<Vehicle> getByOwner(UUID ownerId) {
         log.debug("Getting vehicles for owner {}", ownerId);
 

@@ -57,9 +57,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User registerCustomer(String email, String password, String firstName, String lastName,
-                                 String phone, String addressLine1, String addressLine2, String city, String zip) {
-        log.debug("Registering new customer with email {}", email);
+    public User createUserByOwner(UserRole role, String email, String password, String firstName, String lastName,
+                                    String phone, String addressLine1, String addressLine2, String city, String zip) {
+        log.debug("Owner creating user with email {} and role {}", email, role);
+
+        if (role != UserRole.CUSTOMER && role != UserRole.MECHANIC) {
+            throw new IllegalArgumentException("Only CUSTOMER or MECHANIC accounts can be created");
+        }
 
         if (userRepository.existsByEmail(email)) {
             throw new IllegalArgumentException("User with email " + email + " already exists");
@@ -68,7 +72,7 @@ public class UserServiceImpl implements UserService {
         User user = User.builder()
                 .email(email)
                 .passwordHash(passwordEncoder.encode(password))
-                .role(UserRole.CUSTOMER)
+                .role(role)
                 .firstName(firstName)
                 .lastName(lastName)
                 .phone(phone)
@@ -100,6 +104,14 @@ public class UserServiceImpl implements UserService {
         log.debug("Getting all customers");
 
         return userRepository.findByRole(UserRole.CUSTOMER);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<User> getAllMechanics() {
+        log.debug("Getting all mechanics");
+
+        return userRepository.findByRole(UserRole.MECHANIC);
     }
 
     @Override
@@ -145,6 +157,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public User assignRole(UUID userId, UserRole role) {
         log.debug("Assigning role {} to user {}", role, userId);
+
+        if (role == UserRole.OWNER) {
+            throw new IllegalArgumentException("OWNER role cannot be assigned via API");
+        }
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));

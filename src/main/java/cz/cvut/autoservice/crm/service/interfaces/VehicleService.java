@@ -17,6 +17,8 @@ public interface VehicleService {
 
     Vehicle getById(UUID id);
 
+    List<Vehicle> getAllVehicles();
+
     List<Vehicle> getByOwner(UUID ownerId);
 
     List<Vehicle> searchVehicles(String query);

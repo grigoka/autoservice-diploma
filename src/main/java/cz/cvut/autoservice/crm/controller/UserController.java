@@ -1,6 +1,7 @@
 package cz.cvut.autoservice.crm.controller;
 
 import cz.cvut.autoservice.crm.dto.AssignRoleRequest;
+import cz.cvut.autoservice.crm.dto.CreateUserRequest;
 import cz.cvut.autoservice.crm.dto.UpdateUserRequest;
 import cz.cvut.autoservice.crm.dto.UserResponse;
 import cz.cvut.autoservice.crm.domain.model.User;
@@ -8,6 +9,7 @@ import cz.cvut.autoservice.crm.security.CurrentUser;
 import cz.cvut.autoservice.crm.service.interfaces.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +25,24 @@ public class UserController {
 
     private final UserService userService;
 
+    @PostMapping("/users")
+    @PreAuthorize("hasRole('OWNER')")
+    public ResponseEntity<UserResponse> createUser(@Valid @RequestBody CreateUserRequest request) {
+        User created = userService.createUserByOwner(
+                request.getRole(),
+                request.getEmail(),
+                request.getPassword(),
+                request.getFirstName(),
+                request.getLastName(),
+                request.getPhone(),
+                request.getAddressLine1(),
+                request.getAddressLine2(),
+                request.getCity(),
+                request.getZip()
+        );
+        return ResponseEntity.status(HttpStatus.CREATED).body(mapToUserResponse(created));
+    }
+
     @GetMapping("/me")
     @PreAuthorize("hasAnyRole('OWNER', 'CUSTOMER', 'MECHANIC')")
     public ResponseEntity<UserResponse> getCurrentUser() {
@@ -36,6 +56,16 @@ public class UserController {
     public ResponseEntity<List<UserResponse>> getAllCustomers() {
         List<User> customers = userService.getAllCustomers();
         List<UserResponse> responses = customers.stream()
+                .map(this::mapToUserResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(responses);
+    }
+
+    @GetMapping("/mechanics")
+    @PreAuthorize("hasRole('OWNER')")
+    public ResponseEntity<List<UserResponse>> getAllMechanics() {
+        List<User> mechanics = userService.getAllMechanics();
+        List<UserResponse> responses = mechanics.stream()
                 .map(this::mapToUserResponse)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(responses);

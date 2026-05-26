@@ -52,6 +52,15 @@ public class VehicleController {
         return ResponseEntity.ok(responses);
     }
 
+    @GetMapping("/vehicles")
+    @PreAuthorize("hasRole('OWNER')")
+    public ResponseEntity<List<VehicleResponse>> getAllVehicles() {
+        List<VehicleResponse> responses = vehicleService.getAllVehicles().stream()
+                .map(this::mapToVehicleResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(responses);
+    }
+
     @GetMapping("/vehicles/{vehicleId}")
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<VehicleResponse> getVehicleById(@PathVariable UUID vehicleId) {

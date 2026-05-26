@@ -88,13 +88,24 @@ class ScenarioIntegrationTest {
     }
 
     @Test
-    void scenario_register_and_login_customer() throws Exception {
+    void scenario_owner_creates_customer_then_login() throws Exception {
+        User owner = userRepository.save(User.builder()
+                .email("owner@example.com")
+                .passwordHash(passwordEncoder.encode("ownerpass"))
+                .role(UserRole.OWNER)
+                .firstName("Own")
+                .lastName("Er")
+                .build());
+
         String email = "cust@example.com";
         String password = "secret123";
+        String ownerToken = jwtService.generateToken(owner.getId(), owner.getRole());
 
-        mockMvc.perform(post("/api/auth/register")
+        mockMvc.perform(post("/api/users")
+                        .header("Authorization", "Bearer " + ownerToken)
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of(
+                                "role", "CUSTOMER",
                                 "email", email,
                                 "password", password,
                                 "firstName", "John",

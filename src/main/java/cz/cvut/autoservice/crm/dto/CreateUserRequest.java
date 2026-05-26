@@ -1,12 +1,21 @@
 package cz.cvut.autoservice.crm.dto;
 
+import cz.cvut.autoservice.crm.domain.model.enums.UserRole;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data
-public class RegisterRequest {
+public class CreateUserRequest {
+
+    /**
+     * Only {@link UserRole#CUSTOMER} or {@link UserRole#MECHANIC} — enforced in service.
+     */
+    @NotNull
+    private UserRole role;
+
     @Email
     @NotBlank
     private String email;
@@ -27,4 +36,3 @@ public class RegisterRequest {
     private String city;
     private String zip;
 }
-
